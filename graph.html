@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Example Line Graph</title>
+    <script src="Chart.js"></script>
+</head>
+
+<body>
+    <div style="width: 75%">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        var randomScalingFactor = function() {
+            return (Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+        };
+        var randomColorFactor = function() {
+            return Math.round(Math.random() * 255);
+        };
+        var lineData = {
+            labels: [0],
+            datasets: [{
+                label: 'Temperature',
+                backgroundColor: "rgba(220,220,220,0.5)",
+                data: [randomScalingFactor()]
+            }, {
+                label: 'Humidity',
+                backgroundColor: "rgba(151,187,205,0.5)",
+                data: [randomScalingFactor()]
+            }]
+        };
+	var latestLabel = 1;
+        window.onload = function() {
+            var ctx = document.getElementById("canvas").getContext("2d");
+            var myLine = new Chart(ctx, {
+                type: 'line',
+                data: lineData,
+		animationSteps: 15,
+                options: {
+                    title:{
+                        display:true,
+                        text:"Example Graph"
+                    },
+                    tooltips: {
+                        mode: 'label'
+                    },
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+                }
+            });
+	    setInterval(function()
+	    {
+		myLine.data.datasets[0].data.push(Math.random() * 100);
+		myLine.data.datasets[1].data.push(Math.random() * 10);
+		myLine.data.labels.push(++latestLabel);
+
+		if (latestLabel >10)
+		{
+			myLine.data.datasets[0].data.shift();
+			myLine.data.datasets[1].data.shift();
+			myLine.data.labels.shift();
+		}
+		myLine.update();
+	    }, 1000);
+        };
+    </script>
+</body>
+
+</html>
