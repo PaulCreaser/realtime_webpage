@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Example Line Graph</title>
+    <script type="text/javascript" src="Chart.js"></script>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div style="width: 90%">
+        <canvas id="canvas"></canvas>
+    </div>
+    <script>
+        var randomScalingFactor = function() {
+            return (Math.random() > 0.5 ? 1.0 : -1.0) * Math.round(Math.random() * 100);
+        };
+        var randomColorFactor = function() {
+            return Math.round(Math.random() * 255);
+        };
+        var lineData = {
+            labels: [0],
+            datasets: [{
+                label: 'Temperature',
+                backgroundColor: "rgba(220,220,220,0.5)",
+                data: [randomScalingFactor()]
+            }]
+        };
+	var latestLabel = 1;
+        var socket = null;
+        var myLine = null;
+        
+        function chartAddData(data)
+        {
+                if (myLine == null)
+                {
+                        console.log("No chart");
+                        return;
+                }
+        	myLine.data.datasets[0].data.push(data);
+		myLine.data.labels.push(++latestLabel);
+
+		if (latestLabel >10)
+		{
+			myLine.data.datasets[0].data.shift();
+			myLine.data.labels.shift();
+		}
+		myLine.update();
+        }
+        
+        window.onload = function() {
+            socket = io.connect("http://localhost:8124");
+            socket.on("data",function(data)
+            {
+                console.log("Got Data:-", data);
+                chartAddData(data);
+            });
+            
+            var ctx = document.getElementById("canvas").getContext("2d");
+            myLine = new Chart(ctx, {
+                type: 'line',
+                data: lineData,
+		animationSteps: 15,
+                options: {
+                    title:{
+                        display:true,
+                        text:"Example Graph"
+                    },
+                    tooltips: {
+                        mode: 'label'
+                    },
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            stacked: true,
+                        }],
+                        yAxes: [{
+                            stacked: true
+                        }]
+                    }
+                }
+            });
+        };
+    </script>
+</body>
+
+</html>
